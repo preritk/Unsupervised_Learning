@@ -32,7 +32,7 @@ def main():
 
     ###Make possible combinations of 2 features and plot graphs to get some intuition .
     ###This will help us know how many clusters can be there by visualisation.
-    """for i in range(len(X)):
+    for i in range(len(X)):
         plt.scatter(X[i][0],X[i][1],marker = 'x',color = 'b')
     plt.show()
     for i in range(len(X)):
@@ -49,7 +49,7 @@ def main():
     plt.show()
     for i in range(len(X)):
         plt.scatter(X[i][1], X[i][2], marker='x', color='b')
-    plt.show()"""
+    plt.show()
     ##From the above 6 plots we get to know that there are minimum 2 clusters and we have to find the correct number of clusters.
     ##We can find it out by using elbow method or run the program using different values of K and that K for which cost
     ## is minimum is the optimal number
