@@ -5,23 +5,34 @@ import numpy as np
 import matplotlib.pyplot as plt
 import random
 import math
-def calc_closets(c1,c2,c3,X):   ##This function defines closets of each point
-    return 0
+def costfunc(set1,set2,set3,c1,c2,c3):
+    J = 0.0
+    a = len(set1)
+    b = len(set2)
+    c = len(set3)
+    for i in range(a):
+        J += math.pow(distance(set1[i],c1),2)
+    for i in range(b):
+        J += math.pow(distance(set2[i], c2),2)   ##Cost is calculated from all the K sets .
+    for i in range(c):
+        J += math.pow(distance(set3[i], c3),2)
+    return J/150
+
 
 def distance(instance,centroid):
     dist = 0.0
+    #print(centroid)
     for i in range(len(instance)):
-        dist = dist + math.pow(instance[i] - centroid[i],2)
+        dist = dist + math.pow(instance[i] - centroid[i] , 2)  #Eucledian distance formula
     return math.sqrt(dist)
 
 def InitializeMean(K,X):
     ##Randomly choose any 3 datasets manually or use random function to generate random values of index.
     ##Here we will generate random function .
-    c1,c2,c3 =[],[],[]
-    i1 = random.randint(1,50)
-    i2 = random.randint(51,100)
-    i3 = random.randint(101,150)
-    return c1,c2,c3
+    i1 = random.randint(1,100)
+    i2 = random.randint(50,149)   #You can specify some other range also .
+    i3 = random.randint(1,149)
+    return X[i1],X[i2],X[i3]
 
 def main():
     X = pd.read_csv('iris.csv', header = None , usecols = [0,1,2,3]).values   ##Getting values of X(i)
@@ -57,44 +68,45 @@ def main():
     ##Here we have prior knowledge of types of iris so we intuitively take K = 3 .
     K = 3
     m = len(X)
-    i1,i2,i3 = InitializeMean(K,X)      
-    temp1,temp2,temp3 =0,0,0
-    dist1,dist2,dist3 = 0.0,0.0,0.0
-    set1,set2,set3 = [],[],[]
-    while(1):
-        max = 0.0
-        set1,set2,set3 = [],[],[]
-        for i in range(m):                  ##This loop is to find the distance of each point with the cluster centroid
-            dist1 = distance(X[i],X[i1])    ##Distance from cluster centroid1
-            dist2 = distance(X[i],X[i2])    ##Distance from cluster centroid2
-            dist3 = distance(X[i],X[i2])    ##Distance from cluster centroid3
-            if(dist1>max):
-                max = dist1
-            if(dist2>max):
-                max = dist2                 ##Finding max of all three distances
-            if(dist3>max):
-                max = dist3
+    iterator, cost = [], []
+    for k in range(50):
+        c1, c2, c3 = InitializeMean(K, X)
+        temp1, temp2, temp3 = [0.0, 0.0, 0.0, 0.0], [0.0, 0.0, 0.0, 0.0], [0.0, 0.0, 0.0, 0.0]
+        dist1, dist2, dist3 = 0.0, 0.0, 0.0
+        set1, set2, set3 = [], [], []
+        A = 0
+        while(A != 1000):
+            set1,set2,set3 = [],[],[]
+            for i in range(m):
+                dist1 = distance(X[i],c1)
+                dist2 = distance(X[i],c2)  #finding distances from all the centroids
+                dist3 = distance(X[i],c3)
+                #Now find minimum of all these distances .
+                min = dist1
+                if(dist2<min):
+                    min = dist2
+                if(dist3<min):
+                    min = dist3
 
-            if(max==dist1):
-                set1.append(i)
-            elif(max==dist2):
-                set2.append(i)              ##Finding the closure set of each centroid .
-            else:
-                set3.append(i)
-
-        i1 = int(np.mean(set1))                  ##centroid of first cluster
-        i2 = int(np.mean(set2))                  ##centroid of second cluster
-        i3 = int(np.mean(set3))                  ##centroid of third cluster
-        if(i1==temp1 and i2==temp2 and i3 == temp3):  ##checking whether centroids moved or not
-            break
-        if(i1 != temp1):
-            temp1 = i1
-        if(i2 != temp2):
-            temp2 = i2
-        if(i3 != temp3):
-            temp3 = i3
-
-
-
-
+                if(min==dist1):
+                    set1.append(X[i])
+                elif(min==dist2):
+                    set2.append(X[i])      #finding closets of all centroids
+                else:
+                    set3.append(X[i])
+            #Now we have to update centroids .
+            #Updating centroids as follows::
+            #Take mean of all the points in the closets
+            c1 = np.mean(set1,axis = 0)
+            c2 = np.mean(set2,axis = 0)
+            c3 = np.mean(set3,axis = 0)
+            A += 1
+        J = costfunc(set1,set2,set3,c1,c2,c3)
+        iterator.append(k)
+        cost.append(J)
+    plt.plot(iterator,cost,'-',color = 'b')
+    plt.show()
+    print("WORK FINISHED !!!")
+    ##NOW YOU WILL GWT A PLOT OF COST . CHOOSE THAT POINT WHERE COST IS MINIMUM .
+    ##SO THIS DIVIDED THE DATASET INTO K CLUSTERS.
 main()
